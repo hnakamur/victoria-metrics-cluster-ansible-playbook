@@ -1,0 +1,51 @@
+---
+ansible_python_interpreter: "{{ python_fullpath | default('/usr/bin/python3') }}"
+
+victoria_metrics_version: "1.107.0"
+victoria_metrics_cluster_checksum: "sha256:e60f8199276c88c1d201a59a54743380f937ed772b3cad09fbb87177d38fbbaf"
+victoria_metrics_utils_checksum: "sha256:a5f91c0173dfc6c71a75db9c9fd2a3ff8a480dffa0c05fa68665eb0fc254b902"
+
+vmauth_auth_config: |-
+  unauthorized_user:
+    url_prefix:
+      - "http://vicmet01:8481"
+      - "http://vicmet02:8481"
+
+vminsert_config:
+  replicationFactor: 1
+  storageNode: vicmet01,vicmet02
+
+vmselect_config:
+  storageNode: vicmet01,vicmet02
+  cacheDataPath: "{{ victoria_metrics_data_dir }}/vmselect"
+
+vmagent_service_args:
+  "remoteWrite.url":
+    - "http://vicmet01:8480/insert/0/prometheus/"
+    - "http://vicmet02:8480/insert/0/prometheus/"
+  "promscrape.config": "{{ victoria_metrics_config_dir }}/vmagent_prometheus_scrape.yaml"
+  "remoteWrite.tmpDataPath": "{{ vmagent_tmp_data_path }}"
+  "remoteWrite.streamAggr.config": "{{ victoria_metrics_config_dir }}/vmagent_stream_aggregation.yaml"
+
+vmagent_scrape_config:
+  global:
+    scrape_interval: 10s
+  scrape_configs:
+    - job_name: vmagent
+      static_configs:
+        - targets: ['localhost:8429']
+    - job_name: vmauth
+      static_configs:
+        - targets: ['localhost:8427']
+    - job_name: vmalert
+      static_configs:
+        - targets: ['localhost:8880']
+    - job_name: vminsert
+      static_configs:
+        - targets: ['localhost:8480']
+    - job_name: vmselect
+      static_configs:
+        - targets: ['vicmet01:8481', 'vicmet02:8481']
+    - job_name: vmstorage
+      static_configs:
+        - targets: ['vicmet01:8482', 'vicmet02:8482']

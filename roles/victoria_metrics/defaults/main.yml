@@ -1,0 +1,83 @@
+
+victoria_metrics_system_user: victoria-metrics
+victoria_metrics_system_group: "{{ victoria_metrics_system_user }}"
+victoria_metrics_bin_dir: /opt/victoria-metrics/bin
+victoria_metrics_config_dir: /opt/victoria-metrics/etc
+victoria_metrics_data_dir: /var/lib/victoria-metrics
+
+vmstorage_config:
+  retentionPeriod: "1"
+  storageDataPath: "{{ victoria_metrics_data_dir }}/vmstorage"
+
+vmsinsert_systemd_protect_home: "yes"
+vminsert_relabel_config: ""
+vminsert_exec_start_post: ""
+vminsert_exec_stop: ""
+
+vmselect_systemd_protect_home: ""
+vmselect_exec_start_post: ""
+vmselect_exec_stop: ""
+
+vmstorage_systemd_protect_home: "yes"
+vmstorage_exec_start_post: ""
+vmstorage_exec_stop: ""
+
+victoria_metrics_vmalert_service_name: "vmalert"
+victoria_metrics_vmalert_rules_config_path: "{{ victoria_metrics_config_dir }}/vmalert_rules.yaml"
+victoria_metrics_vmalert_alertmanager_url: "http://localhost:9093"
+victoria_metrics_vmalert_datasource_url: "http://localhost:8428"
+victoria_metrics_vmalert_evaluation_interval: "30s"
+victoria_metrics_vmalert_service_args:
+  "httpListenAddr": "127.0.0.1:9431"
+  "datasource.url": "{{ victoria_metrics_vmalert_datasource_url }}"
+  "notifier.url": "{{ victoria_metrics_vmalert_alertmanager_url }}"
+  "rule": "{{ victoria_metrics_vmalert_rules_config_path }}"
+  "evaluationInterval": "{{ victoria_metrics_vmalert_evaluation_interval }}"
+
+
+# Great examples of alerts - https://awesome-prometheus-alerts.grep.to/rules.html
+victoria_metrics_vmalert_rules:
+  - name: ansible managed alert rules
+    rules:
+      - alert: HostOutOfMemory
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: '{% raw %}Host out of memory (instance {{ $labels.instance }}){% endraw %}'
+          description: '{% raw %}"Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"{% endraw %}'
+
+vmauth_systemd_protect_home: "yes"
+vmauth_exec_start_post: ""
+vmauth_exec_stop: ""
+
+vmauth_service_args: {}
+
+vmauth_env_config: {}
+
+# See: https://docs.victoriametrics.com/vmauth/#use-cases
+vmauth_auth_config: |-
+  unauthorized_user:
+    url_prefix: "http://vicmet01/"
+
+vmagent_systemd_protect_home: "yes"
+vmagent_exec_start_post: ""
+vmagent_exec_stop: ""
+
+vmagent_tmp_data_path: "/tmp/vmagent"
+vmagent_service_args:
+  # NOTE: The following value is the default for single VictoriaMetrics server, not cluster.
+  "remoteWrite.url": "http://localhost:8428/api/v1/write"
+  "promscrape.config": "{{ victoria_metrics_config_dir }}/vmagent_prometheus_scrape.yaml"
+  "remoteWrite.tmpDataPath": "{{ vmagent_tmp_data_path }}"
+  "remoteWrite.streamAggr.config": "{{ victoria_metrics_config_dir }}/vmagent_stream_aggregation.yaml"
+
+vmagent_scrape_config:
+  scrape_configs:
+    - job_name: localhost
+      static_configs:
+        - targets: []
+#          - "127.0.0.1:9100"
+
+vmagent_aggregation_config: []

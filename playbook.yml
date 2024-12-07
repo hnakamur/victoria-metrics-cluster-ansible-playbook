@@ -1,0 +1,5 @@
+- name: Set up victoria-metrics cluster
+  hosts: all
+  roles:
+  - role: victoria_metrics
+  - role: grafana_oss

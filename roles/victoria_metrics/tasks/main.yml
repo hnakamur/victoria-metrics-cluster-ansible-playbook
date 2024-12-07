@@ -1,0 +1,10 @@
+---
+- import_tasks: install.yml
+  tags:
+  - victoria_metrics
+  - victoria_metrics_install
+
+- import_tasks: config.yml
+  tags:
+  - victoria_metrics
+  - victoria_metrics_config

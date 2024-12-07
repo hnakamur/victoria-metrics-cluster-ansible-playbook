@@ -1,0 +1,31 @@
+---
+- name: Create vmstorage config file
+  template:
+    src: vmstorage.conf.j2
+    dest: "{{ victoria_metrics_config_dir }}/vmstorage.conf"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0644
+  register: vmstorage_config_file_result
+
+- name: Create vmstorage service file
+  template:
+    src: vmstorage.service.j2
+    dest: "/etc/systemd/system/vmstorage.service"
+    owner: root
+    group: root
+    mode: 0644
+  register: vmstorage_service_result
+
+- name: Start and enable vmstorage service
+  systemd:
+    name: vmstorage
+    state: started
+    enabled: true
+
+- name: Restart vmstorage service when config or service file changed
+  systemd:
+    name: vmstorage
+    state: restarted
+    daemon_reload: true
+  when: vmstorage_config_file_result.changed or vmstorage_service_result.changed

@@ -1,0 +1,40 @@
+---
+- name: Create directory for vmalert alerts config
+  file:
+    path: "{{ victoria_metrics_vmalert_rules_config_path | dirname }}"
+    state: directory
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0751
+
+- name: Create vmalert config file
+  template:
+    src: vmalert_rules.yaml.j2
+    dest: "{{ victoria_metrics_vmalert_rules_config_path }}"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0644
+    validate: "{{ victoria_metrics_bin_dir }}//vmalert-prod {% for k, v in victoria_metrics_vmalert_service_args.items() %}{% if k.startswith('license') %} -{{ k }}={{ v }} {%endif %}{% endfor %} -dryRun -rule %s"
+  register: vmalert_alerts_config_file_result
+
+- name: Create vmalert service file
+  template:
+    src: vmalert.service.j2
+    dest: "/etc/systemd/system/{{ victoria_metrics_vmalert_service_name }}.service"
+    owner: root
+    group: root
+    mode: 0644
+  register: vmalert_service_result
+
+- name: Start and enable vmalert service
+  systemd:
+    name: "{{ victoria_metrics_vmalert_service_name }}"
+    state: started
+    enabled: true
+
+- name: Restart vmalert service when config or service file changed
+  systemd:
+    name: "{{ victoria_metrics_vmalert_service_name }}"
+    state: restarted
+    daemon_reload: true
+  when: vmalert_alerts_config_file_result.changed or vmalert_service_result.changed

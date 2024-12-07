@@ -1,0 +1,41 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Description=VictoriaMetrics vmagent service
+After=network.target
+
+[Service]
+Type=simple
+User={{ victoria_metrics_system_user }}
+Group={{ victoria_metrics_system_group }}
+ExecStart={{ victoria_metrics_bin_dir }}/vmagent-prod {%- for flag, flag_values in vmagent_service_args.items() -%}
+{%- if flag_values | type_debug == "list" -%}
+{% for flag_value in flag_values %} --{{ flag }}={{ flag_value }} {% endfor %}
+{% else %} --{{ flag }}={{ flag_values }} {% endif %}
+{% endfor %}
+
+SyslogIdentifier=vic-vmagent
+Restart=always
+
+PrivateTmp=yes
+ProtectHome={{ vmagent_systemd_protect_home }}
+NoNewPrivileges=yes
+
+ProtectSystem=full
+
+{% if victoria_metrics_systemd_version | int >= 232 %}
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=yes
+{% endif %}
+
+{% if vmagent_exec_start_post != "" %}
+ExecStartPost={{ vmagent_exec_start_post }}
+{% endif %}
+
+{% if vmagent_exec_stop != "" %}
+ExecStop={{ vmagent_exec_stop }}
+{% endif %}
+
+[Install]
+WantedBy=multi-user.target

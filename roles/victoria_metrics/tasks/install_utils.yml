@@ -1,0 +1,15 @@
+
+- name: Download VictoriaMetrics utils tarball
+  get_url:
+    url: "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v{{ victoria_metrics_version }}/vmutils-linux-amd64-v{{ victoria_metrics_version }}.tar.gz"
+    dest: "/tmp/vmutils-linux-amd64-v{{ victoria_metrics_version }}.tar.gz"
+    checksum: "{{ victoria_metrics_utils_checksum }}"
+
+- name: Extract VictoriaMetrics utils tarball
+  unarchive:
+    src: "/tmp/vmutils-linux-amd64-v{{ victoria_metrics_version }}.tar.gz"
+    remote_src: true
+    dest: "{{ victoria_metrics_bin_dir }}"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0755

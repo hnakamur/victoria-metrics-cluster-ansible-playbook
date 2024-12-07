@@ -1,0 +1,5 @@
+{{ ansible_managed | comment }}
+# Great examples of alerts - https://awesome-prometheus-alerts.grep.to/rules.html
+
+groups:
+  {{ victoria_metrics_vmalert_rules | to_nice_yaml(indent=2, sort_keys=False) | indent(2, False) }}

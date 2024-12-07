@@ -1,0 +1,3 @@
+[all]
+vicmet01 ansible_connection=community.general.incus ansible_incus_project=vicmet
+vicmet02 ansible_connection=community.general.incus ansible_incus_project=vicmet

@@ -1,0 +1,55 @@
+---
+- name: Create group for VictoriaMetrics
+  group:
+    name: "{{ victoria_metrics_system_group }}"
+    system: true
+
+- name: Create user for VictoriaMetrics
+  user:
+    name: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    createhome: false
+
+- name: Create directories for VictoriaMetrics
+  file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0751
+  with_items:
+    - "{{ victoria_metrics_bin_dir }}"
+    - "{{ victoria_metrics_config_dir }}"
+    - "{{ victoria_metrics_data_dir }}"
+
+- name: Check installed VictoriaMetrics cluster version
+  shell: "{{ victoria_metrics_bin_dir }}/vminsert-prod -version | sed 's/.*-tags-v//;s/-.*//'"
+  register: victoria_metrics_cluster_installed_version_result
+  check_mode: false
+  changed_when: false
+  failed_when: false
+
+- import_tasks: install_cluster.yml
+  when: victoria_metrics_cluster_installed_version_result.stdout|default('') != victoria_metrics_version
+
+- name: Remove victoria-metrics-cluster tarball
+  file:
+    path: "/tmp/victoria-metrics-linux-amd64-v{{ victoria_metrics_version }}-cluster.tar.gz"
+    state: absent
+
+
+- name: Check installed VictoriaMetrics utils version
+  shell: "{{ victoria_metrics_bin_dir }}/vmagent-prod -version | sed 's/.*-tags-v//;s/-.*//'"
+  register: victoria_metrics_utils_installed_version_result
+  check_mode: false
+  changed_when: false
+
+- import_tasks: install_utils.yml
+  when: victoria_metrics_utils_installed_version_result.stdout|default('') != victoria_metrics_version
+
+- name: Remove VictoriaMetrics utils tarball
+  file:
+    path: "/tmp/vmutils-linux-amd64-v{{ victoria_metrics_version }}.tar.gz"
+    state: absent

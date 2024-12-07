@@ -1,0 +1,27 @@
+---
+- name: Install packages to set up Grafana apt repository
+  apt:
+    pkg:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    update_cache: yes
+
+- name: Download Grafana apt repository key
+  shell: curl -fsSL 'https://apt.grafana.com/gpg.key' | gpg --dearmor -o /etc/apt/keyrings/grafana.gpg
+  args:
+    creates: /etc/apt/keyrings/grafana.gpg
+
+- name: Create Grafana apt respoistory sources file
+  copy:
+    src: grafana.sources
+    dest: /etc/apt/sources.list.d/grafana.sources
+
+- name: Install Grafana OSS
+  apt:
+    pkg:
+      - grafana
+    update_cache: yes
+
+#- import_tasks: install_clickhouse_datasource.yml

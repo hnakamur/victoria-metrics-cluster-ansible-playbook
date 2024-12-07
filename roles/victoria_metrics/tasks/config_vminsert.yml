@@ -1,0 +1,41 @@
+---
+- name: Create vminsert config file
+  template:
+    src: vminsert.conf.j2
+    dest: "{{ victoria_metrics_config_dir }}/vminsert.conf"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0644
+  register: vminsert_config_file_result
+
+- name: Create vminsert relabeling config file
+  template:
+    src: vminsert_relabel.conf.j2
+    dest: "{{ victoria_metrics_config_dir }}/vminsert_relabel.conf"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0644
+  register: vminsert_relabel_config_file_result
+  when: vminsert_relabel_config != ""
+
+- name: Create vminsert service file
+  template:
+    src: vminsert.service.j2
+    dest: "/etc/systemd/system/vminsert.service"
+    owner: root
+    group: root
+    mode: 0644
+  register: vminsert_service_result
+
+- name: Start and enable vminsert service
+  systemd:
+    name: vminsert
+    state: started
+    enabled: true
+
+- name: Restart vminsert service when config or service file changed
+  systemd:
+    name: vminsert
+    state: restarted
+    daemon_reload: true
+  when: vminsert_config_file_result.changed or vminsert_service_result.changed

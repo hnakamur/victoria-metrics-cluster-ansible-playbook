@@ -1,0 +1,10 @@
+---
+- import_tasks: install.yml
+  tags:
+  - grafana_oss
+  - grafana_oss_install
+
+- import_tasks: config.yml
+  tags:
+  - grafana_oss
+  - grafana_oss_config

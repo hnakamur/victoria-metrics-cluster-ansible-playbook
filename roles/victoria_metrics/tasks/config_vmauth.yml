@@ -1,0 +1,40 @@
+---
+- name: Create vmauth config file
+  template:
+    src: vmauth.yaml.j2
+    dest: "{{ victoria_metrics_config_dir }}/vmauth.yaml"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0644
+  register: vmauth_config_file_result
+
+- name: Create vmauth env file
+  template:
+    src: vmauth_env.conf.j2
+    dest: "{{ victoria_metrics_config_dir }}/vmauth_env.conf"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0644
+  register: vmauth_env_file_result
+
+- name: Create vmauth service file
+  template:
+    src: vmauth.service.j2
+    dest: "/etc/systemd/system/vmauth.service"
+    owner: root
+    group: root
+    mode: 0644
+  register: vmauth_service_file_result
+
+- name: Start and enable vmauth service
+  systemd:
+    name: vmauth
+    state: started
+    enabled: true
+
+- name: Restart vmauth service when config or service file changed
+  systemd:
+    name: vmauth
+    state: restarted
+    daemon_reload: true
+  when: vmauth_config_file_result.changed or vmauth_env_file_result.changed or vmauth_service_file_result.changed

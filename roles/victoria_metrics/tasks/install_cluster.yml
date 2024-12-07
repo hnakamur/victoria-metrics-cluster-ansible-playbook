@@ -1,0 +1,14 @@
+- name: Download VictoriaMetrics cluster tarball
+  get_url:
+    url: "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v{{ victoria_metrics_version }}/victoria-metrics-linux-amd64-v{{ victoria_metrics_version }}-cluster.tar.gz"
+    dest: "/tmp/victoria-metrics-linux-amd64-v{{ victoria_metrics_version }}-cluster.tar.gz"
+    checksum: "{{ victoria_metrics_cluster_checksum }}"
+
+- name: Extract VictoriaMetrics cluster tarball
+  unarchive:
+    src: "/tmp/victoria-metrics-linux-amd64-v{{ victoria_metrics_version }}-cluster.tar.gz"
+    remote_src: true
+    dest: "{{ victoria_metrics_bin_dir }}"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0755

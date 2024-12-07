@@ -1,0 +1,39 @@
+---
+# https://grafana.com/tutorials/provision-dashboards-and-data-sources/
+- name: Add datasource for VictoriaMetrics cluster to Grafana
+  template:
+    src: datasources.yaml.j2
+    dest: /etc/grafana/provisioning/datasources/default.yaml
+    owner: root
+    group: grafana
+    mode: 0644
+
+- name: Add dashboard config for VictoriaMetrics cluster to Grafana
+  template:
+    src: dashboard.yaml.j2
+    dest: /etc/grafana/provisioning/dashboards/dashboard.yaml
+    owner: root
+    group: grafana
+    mode: 0644
+
+- name: Create Grafana dashboards directory
+  file:
+    path: /var/lib/grafana/dashboards
+    state: directory
+    owner: root
+    group: grafana
+    mode: 0751
+
+- name: Add dashboards for VictoriaMetrics cluster to Grafana
+  copy:
+    src: "{{ item }}"
+    dest: "/var/lib/grafana/dashboards/{{ item.split('/')|last() }}"
+    owner: root
+    group: grafana
+    mode: 0644
+  with_fileglob: "dashboards/*.json"
+
+- name: Start grafana-server service
+  systemd:
+    name: grafana-server
+    state: started

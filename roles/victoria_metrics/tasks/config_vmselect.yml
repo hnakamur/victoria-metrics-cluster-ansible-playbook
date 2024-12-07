@@ -1,0 +1,31 @@
+---
+- name: Create vmselect config file
+  template:
+    src: vmselect.conf.j2
+    dest: "{{ victoria_metrics_config_dir }}/vmselect.conf"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0644
+  register: vmselect_config_file_result
+
+- name: Create vmselect service file
+  template:
+    src: vmselect.service.j2
+    dest: "/etc/systemd/system/vmselect.service"
+    owner: root
+    group: root
+    mode: 0644
+  register: vmselect_service_result
+
+- name: Start and enable vmselect service
+  systemd:
+    name: vmselect
+    state: started
+    enabled: true
+
+- name: Restart vmselect service when config or service file changed
+  systemd:
+    name: vmselect
+    state: restarted
+    daemon_reload: true
+  when: vmselect_config_file_result.changed or vmselect_service_result.changed

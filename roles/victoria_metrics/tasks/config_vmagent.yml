@@ -1,0 +1,40 @@
+---
+- name: Create vmagent prometheus_scrape config file
+  template:
+    src: vmagent_prometheus_scrape.yaml.j2
+    dest: "{{ victoria_metrics_config_dir }}/vmagent_prometheus_scrape.yaml"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0644
+  register: vmagent_prometheus_scrape_config_file_result
+
+- name: Create vmagent stream_aggregation config file
+  template:
+    src: vmagent_stream_aggregation.yaml.j2
+    dest: "{{ victoria_metrics_config_dir }}/vmagent_stream_aggregation.yaml"
+    owner: "{{ victoria_metrics_system_user }}"
+    group: "{{ victoria_metrics_system_group }}"
+    mode: 0644
+  register: vmagent_stream_aggregation_config_file_result
+
+- name: Create vmagent service file
+  template:
+    src: vmagent.service.j2
+    dest: "/etc/systemd/system/vmagent.service"
+    owner: root
+    group: root
+    mode: 0644
+  register: vmagent_service_file_result
+
+- name: Start and enable vmagent service
+  systemd:
+    name: vmagent
+    state: started
+    enabled: true
+
+- name: Restart vmagent service when config or service file changed
+  systemd:
+    name: vmagent
+    state: restarted
+    daemon_reload: true
+  when: vmagent_prometheus_scrape_config_file_result.changed or vmagent_stream_aggregation_config_file_result or vmagent_service_file_result.changed

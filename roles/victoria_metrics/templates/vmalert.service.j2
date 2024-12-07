@@ -1,0 +1,29 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Description=VictoriaMetrics VMalert service
+After=network.target
+
+[Service]
+Type=simple
+User={{ victoria_metrics_system_user }}
+Group={{ victoria_metrics_system_group }}
+ExecStart={{ victoria_metrics_bin_dir }}/vmalert-prod {% for flag, flag_value in victoria_metrics_vmalert_service_args.items() %}--{{ flag }}={{ flag_value }} {% endfor %}
+
+SyslogIdentifier={{ victoria_metrics_vmalert_service_name }}
+Restart=always
+
+PrivateTmp=yes
+ProtectHome=yes
+NoNewPrivileges=yes
+
+ProtectSystem=full
+
+{% if victoria_metrics_systemd_version | int >= 232 %}
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=yes
+{% endif %}
+
+[Install]
+WantedBy=multi-user.target
