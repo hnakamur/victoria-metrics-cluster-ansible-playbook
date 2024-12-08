@@ -2,4 +2,5 @@
   hosts: all
   roles:
   - role: victoria_metrics
+  - role: prometheus_alertmanager
   - role: grafana_oss

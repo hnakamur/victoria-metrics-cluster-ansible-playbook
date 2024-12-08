@@ -1,0 +1,10 @@
+---
+- import_tasks: install.yml
+  tags:
+  - prometheus_alertmanager
+  - prometheus_alertmanager_install
+
+- import_tasks: config.yml
+  tags:
+  - prometheus_alertmanager
+  - prometheus_alertmanager_config

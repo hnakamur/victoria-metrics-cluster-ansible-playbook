@@ -1,0 +1,4 @@
+prometheus_alertmanager_system_user: prometheus
+prometheus_alertmanager_system_group: "{{ prometheus_alertmanager_system_user }}"
+
+prometheus_alertmanager_bin_dir: "/opt/prometheus_alertmanager/bin"

@@ -1,0 +1,53 @@
+- name: Create group for prometheus_alertmanager
+  group:
+    name: "{{ prometheus_alertmanager_system_group }}"
+    system: true
+
+- name: Create user for prometheus_alertmanager
+  user:
+    name: "{{ prometheus_alertmanager_system_user }}"
+    group: "{{ prometheus_alertmanager_system_group }}"
+    system: true
+    shell: /usr/sbin/nologin
+    createhome: false
+
+- name: Create directories for prometheus_alertmanager
+  file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ prometheus_alertmanager_system_user }}"
+    group: "{{ prometheus_alertmanager_system_group }}"
+    mode: 0751
+  with_items:
+    - "{{ prometheus_alertmanager_bin_dir }}"
+
+- name: Check installed prometheus_alertmanager version
+  shell: "{{ prometheus_alertmanager_bin_dir }}/alertmanager --version | sed '1s/.*version //;s/ .*//;q'"
+  register: prometheus_alertmanager_installed_version_result
+  check_mode: false
+  changed_when: false
+  failed_when: false
+
+- block:
+
+  - name: Download prometheus_alertmanager tarball
+    get_url:
+      url: "https://github.com/prometheus/alertmanager/releases/download/v{{ prometheus_alertmanager_version }}/alertmanager-{{ prometheus_alertmanager_version }}.linux-amd64.tar.gz"
+      dest: "/tmp/alertmanager-{{ prometheus_alertmanager_version }}.linux-amd64.tar.gz"
+      checksum: "{{ prometheus_alertmanager_checksum }}"
+
+  - name: Extract prometheus_alertmanager tarball
+    shell: |
+      tar zxf /tmp/alertmanager-{{ prometheus_alertmanager_version }}.linux-amd64.tar.gz \
+        -C {{ prometheus_alertmanager_bin_dir }} --strip-components=1 \
+        alertmanager-{{ prometheus_alertmanager_version }}.linux-amd64/alertmanager \
+        alertmanager-{{ prometheus_alertmanager_version }}.linux-amd64/amtool \
+      && chown {{ prometheus_alertmanager_system_user }}:{{ prometheus_alertmanager_system_group }} {{ prometheus_alertmanager_bin_dir }}/* \
+      && chmod 755 {{ prometheus_alertmanager_bin_dir }}/*
+
+  - name: Delete prometheus_alertmanager tarball
+    file:
+      path: "/tmp/alertmanager-{{ prometheus_alertmanager_version }}.linux-amd64.tar.gz"
+      state: absent
+
+  when: prometheus_alertmanager_installed_version_result.stdout|default('') != prometheus_alertmanager_version

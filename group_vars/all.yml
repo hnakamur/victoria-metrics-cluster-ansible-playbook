@@ -49,3 +49,6 @@ vmagent_scrape_config:
     - job_name: vmstorage
       static_configs:
         - targets: ['vicmet01:8482', 'vicmet02:8482']
+
+prometheus_alertmanager_version: "0.27.0"
+prometheus_alertmanager_checksum: "sha256:23c3f5a3c73de91dbaec419f3c492bef636deb02680808e5d842e6553aa16074"
