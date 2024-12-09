@@ -11,15 +11,13 @@
     shell: /usr/sbin/nologin
     createhome: false
 
-- name: Create directories for prometheus_alertmanager
+- name: Create bin directory for prometheus_alertmanager
   file:
-    name: "{{ item }}"
+    name: "{{ prometheus_alertmanager_bin_dir }}"
     state: directory
     owner: "{{ prometheus_alertmanager_system_user }}"
     group: "{{ prometheus_alertmanager_system_group }}"
     mode: 0751
-  with_items:
-    - "{{ prometheus_alertmanager_bin_dir }}"
 
 - name: Check installed prometheus_alertmanager version
   shell: "{{ prometheus_alertmanager_bin_dir }}/alertmanager --version | sed '1s/.*version //;s/ .*//;q'"

@@ -1,4 +1,6 @@
 prometheus_alertmanager_system_user: prometheus
 prometheus_alertmanager_system_group: "{{ prometheus_alertmanager_system_user }}"
 
-prometheus_alertmanager_bin_dir: "/opt/prometheus_alertmanager/bin"
+prometheus_alertmanager_bin_dir: "/opt/prometheus-alertmanager/bin"
+prometheus_alertmanager_config_dir: "/opt/prometheus-alertmanager/etc"
+prometheus_alertmanager_storage_dir: "/var/lib/prometheus-alertmanager"

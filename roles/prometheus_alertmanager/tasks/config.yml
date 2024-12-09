@@ -1,0 +1,47 @@
+- name: Create config and storage directories for prometheus_alertmanager
+  file:
+    name: "{{ item }}"
+    state: directory
+    owner: "{{ prometheus_alertmanager_system_user }}"
+    group: "{{ prometheus_alertmanager_system_group }}"
+    mode: 0751
+  with_items:
+    - "{{ prometheus_alertmanager_config_dir }}"
+    - "{{ prometheus_alertmanager_storage_dir }}"
+
+- name: Create prometheus-alertmanager config file
+  template:
+    src: alertmanager.yaml.j2
+    dest: "{{ prometheus_alertmanager_config_dir }}/alertmanager.yaml"
+    owner: "{{ prometheus_alertmanager_system_user }}"
+    group: "{{ prometheus_alertmanager_system_group }}"
+    mode: 0644
+  register: prometheus_alertmanager_config_file_result
+
+- name: Create prometheus-alertmanager service file
+  template:
+    src: prometheus-alertmanager.service.j2
+    dest: "/etc/systemd/system/prometheus-alertmanager.service"
+    owner: root
+    group: root
+    mode: 0644
+  register: prometheus_alertmanager_service_file_result
+
+- name: Start and enable prometheus-alertmanager service
+  systemd:
+    name: prometheus-alertmanager
+    state: started
+    enabled: true
+
+- name: Reload prometheus-alertmanager service when only config file changed
+  systemd:
+    name: prometheus-alertmanager
+    state: reloaded
+  when: prometheus_alertmanager_config_file_result and not prometheus_alertmanager_service_file_result.changed
+
+- name: Restart prometheus-alertmanager service when service file changed
+  systemd:
+    name: prometheus-alertmanager
+    state: restarted
+    daemon_reload: true
+  when: prometheus_alertmanager_service_file_result.changed

@@ -1,0 +1,15 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Alertmanager for Prometheus
+
+[Service]
+Restart=always
+User={{ prometheus_alertmanager_system_user }}
+ExecStart={{ prometheus_alertmanager_bin_dir }}/alertmanager --config.file={{ prometheus_alertmanager_config_dir }}/alertmanager.yaml --storage.path={{ prometheus_alertmanager_storage_dir }}
+ExecReload=/bin/kill -HUP $MAINPID
+TimeoutStopSec=20s
+SendSIGKILL=no
+
+[Install]
+WantedBy=multi-user.target
