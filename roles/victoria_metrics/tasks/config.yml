@@ -1,26 +1,26 @@
 - import_tasks: config_systemd_version.yml
   tags:
-    - victroia_metrics_vmstorage_config
-    - victroia_metrics_vminsert_config
-    - victroia_metrics_vmselect_config
-    - victroia_metrics_vmalert_config
-    - victroia_metrics_vmauth_config
-    - victroia_metrics_vmagent_config
+    - victoria_metrics_vmstorage_config
+    - victoria_metrics_vminsert_config
+    - victoria_metrics_vmselect_config
+    - victoria_metrics_vmalert_config
+    - victoria_metrics_vmauth_config
+    - victoria_metrics_vmagent_config
 
 - import_tasks: config_vmstorage.yml
-  tags: [victroia_metrics_vmstorage_config]
+  tags: [victoria_metrics_vmstorage_config]
 
 - import_tasks: config_vminsert.yml
-  tags: [victroia_metrics_vminsert_config]
+  tags: [victoria_metrics_vminsert_config]
 
 - import_tasks: config_vmselect.yml
-  tags: [victroia_metrics_vmselect_config]
+  tags: [victoria_metrics_vmselect_config]
 
 - import_tasks: config_vmalert.yml
-  tags: [victroia_metrics_vmalert_config]
+  tags: [victoria_metrics_vmalert_config]
 
 - import_tasks: config_vmauth.yml
-  tags: [victroia_metrics_vmauth_config]
+  tags: [victoria_metrics_vmauth_config]
 
 - import_tasks: config_vmagent.yml
-  tags: [victroia_metrics_vmagent_config]
+  tags: [victoria_metrics_vmagent_config]
