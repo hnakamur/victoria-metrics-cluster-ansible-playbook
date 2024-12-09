@@ -14,7 +14,7 @@ vminsert_relabel_config: ""
 vminsert_exec_start_post: ""
 vminsert_exec_stop: ""
 
-vmselect_systemd_protect_home: ""
+vmselect_systemd_protect_home: "yes"
 vmselect_exec_start_post: ""
 vmselect_exec_stop: ""
 
@@ -28,7 +28,7 @@ victoria_metrics_vmalert_alertmanager_url: "http://localhost:9093"
 victoria_metrics_vmalert_datasource_url: "http://localhost:8428"
 victoria_metrics_vmalert_evaluation_interval: "30s"
 victoria_metrics_vmalert_service_args:
-  "httpListenAddr": "127.0.0.1:9431"
+  "httpListenAddr": ":8880"
   "datasource.url": "{{ victoria_metrics_vmalert_datasource_url }}"
   "notifier.url": "{{ victoria_metrics_vmalert_alertmanager_url }}"
   "rule": "{{ victoria_metrics_vmalert_rules_config_path }}"

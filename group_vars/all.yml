@@ -18,6 +18,7 @@ vminsert_config:
 vmselect_config:
   storageNode: vicmet01,vicmet02
   cacheDataPath: "{{ victoria_metrics_data_dir }}/vmselect"
+  vmalert_proxyURL: http://localhost:8880
 
 vmagent_service_args:
   "remoteWrite.url":
@@ -26,6 +27,17 @@ vmagent_service_args:
   "promscrape.config": "{{ victoria_metrics_config_dir }}/vmagent_prometheus_scrape.yaml"
   "remoteWrite.tmpDataPath": "{{ vmagent_tmp_data_path }}"
   "remoteWrite.streamAggr.config": "{{ victoria_metrics_config_dir }}/vmagent_stream_aggregation.yaml"
+
+victoria_metrics_vmalert_datasource_url: "http://localhost:8427/select/0/prometheus"
+victoria_metrics_vmalert_service_args:
+  "httpListenAddr": ":8880"
+  "datasource.url": "{{ victoria_metrics_vmalert_datasource_url }}"
+  "remoteRead.url": "{{ victoria_metrics_vmalert_datasource_url }}"
+  "remoteWrite.url": "http://localhost:8480/insert/0/prometheus"
+  "notifier.url": "{{ victoria_metrics_vmalert_alertmanager_url }}"
+  "rule": "{{ victoria_metrics_vmalert_rules_config_path }}"
+  "evaluationInterval": "{{ victoria_metrics_vmalert_evaluation_interval }}"
+
 
 vmagent_scrape_config:
   global:
