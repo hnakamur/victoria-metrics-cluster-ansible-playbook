@@ -23,7 +23,7 @@ vmstorage_exec_start_post: ""
 vmstorage_exec_stop: ""
 
 victoria_metrics_vmalert_service_name: "vmalert"
-victoria_metrics_vmalert_rules_config_path: "{{ victoria_metrics_config_dir }}/vmalert_rules.yaml"
+victoria_metrics_vmalert_rules_config_dir: "{{ victoria_metrics_config_dir }}/vmalert_rules"
 victoria_metrics_vmalert_alertmanager_url: "http://localhost:9093"
 victoria_metrics_vmalert_datasource_url: "http://localhost:8428"
 victoria_metrics_vmalert_evaluation_interval: "30s"
@@ -31,9 +31,12 @@ victoria_metrics_vmalert_service_args:
   "httpListenAddr": ":8880"
   "datasource.url": "{{ victoria_metrics_vmalert_datasource_url }}"
   "notifier.url": "{{ victoria_metrics_vmalert_alertmanager_url }}"
-  "rule": "{{ victoria_metrics_vmalert_rules_config_path }}"
+  "rule": "{{ victoria_metrics_vmalert_rules_config_dir }}/*.yaml"
   "evaluationInterval": "{{ victoria_metrics_vmalert_evaluation_interval }}"
-
+  # display source of alerts in grafana
+  "external.url": "http://127.0.0.1:3000" #grafana outside container
+  # Note: '{{' is escaped as '{{ "{{" }}' for Ansible in the following line.
+  "external.alert.source": 'explore?orgId=1&left={"datasource":"VictoriaMetrics","queries":[{"expr":{{ "{{" }}.Expr|jsonEscape|queryEscape}},"refId":"A"}],"range":{"from":"{{ "{{" }} .ActiveAt.UnixMilli }}","to":"now"}}'
 
 # Great examples of alerts - https://awesome-prometheus-alerts.grep.to/rules.html
 victoria_metrics_vmalert_rules:
